@@ -4,15 +4,28 @@
   "private": true,
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
-    "test": "jest"
+    "test": "jest",
+    "lint": "esw app/**",
+    "lint-watch": "esw -w --changed app/**",
+    "start:ios": "react-native run-ios && npm run lint-watch",
+    "start:android": "react-native run-android && npm run lint-watch"
   },
   "dependencies": {
     "react": "16.3.1",
     "react-native": "0.55.4"
   },
   "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-eslint": "^8.2.3",
     "babel-jest": "22.4.3",
-    "babel-preset-react-native": "4.0.0",
+    "babel-preset-airbnb": "^2.4.0",
+    "babel-preset-react-native": "^4.0.0",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-import": "^2.11.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.8.2",
+    "eslint-watch": "^3.1.4",
     "jest": "22.4.3",
     "react-test-renderer": "16.3.1"
   },
