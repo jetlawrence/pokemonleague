@@ -5,11 +5,11 @@ import Pokemon from '../entities/Pokemon';
 import type PokeAPIClient from '../PokeAPIClient';
 
 export default class Pokedex {
-  @observable pokemons: Array<Pokemon> = IObservableArray([]);
+  @observable currentPokemons: IObservableArray<Pokemon> = observable([]);
   @observable isLoading: boolean = false;
   @observable nextPageURL: string;
   @observable previousPageURL: string;
-  @observable isErrorLoading: boolean;
+  @observable isErrorLoading: boolean = false;
 
   pokeAPIClient: PokeAPIClient;
 
@@ -18,8 +18,8 @@ export default class Pokedex {
   }
 
   @action
-  addPokemons(pokemons: Array<Pokemon>) {
-    this.pokemons.replace([...this.pokemons, ...pokemons]);
+  setCurrentPokemons(currentPokemons: Array<Pokemon>) {
+    this.currentPokemons.replace(currentPokemons);
   }
 
   @action
