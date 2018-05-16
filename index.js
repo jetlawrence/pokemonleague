@@ -1,4 +1,6 @@
-import { AppRegistry } from "react-native";
-import PokemonTeamBuilder from "./PokemonTeamBuilder";
+/* @flow */
 
-AppRegistry.registerComponent("pokemonleague", () => PokemonTeamBuilder);
+import { AppRegistry } from 'react-native';
+import App from './src/App';
+
+AppRegistry.registerComponent('pokemonleague', () => App);

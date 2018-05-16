@@ -13,6 +13,7 @@
     "it": 0,
     "expect": 0,
     "describe": 0,
-    "navigator": 0
+    "navigator": 0,
+    "fetch": 0
   }
 }
