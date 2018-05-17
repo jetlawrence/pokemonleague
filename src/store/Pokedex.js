@@ -1,6 +1,6 @@
 /* @flow */
 
-import { action, observable, IObservableArray } from 'mobx';
+import { action, computed, observable, IObservableArray } from 'mobx';
 import Pokemon from '../entities/Pokemon';
 import PokeAPIClient from '../PokeAPIClient';
 
@@ -17,11 +17,12 @@ type PokemonListRawData = {
 };
 
 export default class Pokedex {
-  @observable pokemonsCache: IObservableArray<Pokemon> = observable([]);
   @observable currentDisplayedPokemons: IObservableArray<Pokemon> = observable([]);
   @observable isLoading: boolean = false;
-  @observable nextPageURL: string;
-  @observable previousPageURL: string;
+  @observable isLoadingNext: boolean = false;
+  @observable isLoadingPrev: boolean = false;
+  @observable nextPageURL: string | null;
+  @observable previousPageURL: string | null;
   @observable isErrorLoading: boolean = false;
 
   static NUM_OF_PKMNS_PER_PAGE = 20;
@@ -38,11 +39,6 @@ export default class Pokedex {
   }
 
   @action
-  cachePokemon(pokemon: Pokemon) {
-    this.pokemonsCache.push(pokemon);
-  }
-
-  @action
   startLoading() {
     this.isLoading = true;
   }
@@ -53,12 +49,32 @@ export default class Pokedex {
   }
 
   @action
-  setNextPageURL(url: string) {
+  startLoadingNext() {
+    this.isLoadingNext = true;
+  }
+
+  @action
+  finishLoadingNext() {
+    this.isLoadingNext = false;
+  }
+
+  @action
+  finishLoadingPrev() {
+    this.isLoadingPrev = false;
+  }
+
+  @action
+  startLoadingPrev() {
+    this.isLoadingPrev = true;
+  }
+
+  @action
+  setNextPageURL(url: string | null) {
     this.nextPageURL = url;
   }
 
   @action
-  setPreviousPageURL(url: string) {
+  setPreviousPageURL(url: string | null) {
     this.previousPageURL = url;
   }
 
@@ -67,9 +83,29 @@ export default class Pokedex {
     this.isErrorLoading = true;
   }
 
+  @computed
+  get hasNext(): boolean {
+    return Boolean(this.nextPageURL);
+  }
+
+  @computed
+  get hasPrev(): boolean {
+    return Boolean(this.previousPageURL);
+  }
+
   @action
   successLoading() {
     this.isErrorLoading = false;
+  }
+
+  reloadFetchPokemons() {
+    if (this.isLoadingNext) {
+      this.fetchPokemons({ shouldFetchNextPage: true });
+    } else if (this.isLoadingPrev) {
+      this.fetchPokemons({ shouldFetchPrevPage: true });
+    } else {
+      this.fetchPokemons();
+    }
   }
 
   async fetchPokemons({
@@ -80,17 +116,24 @@ export default class Pokedex {
       shouldFetchPreviousPage?: boolean,
     } = { shouldFetchNextPage: false, shouldFetchPreviousPage: false }) {
     try {
+      if (this.isLoading) {
+        return;
+      }
       this.startLoading();
 
       const { getPokemonDataByURL, getPokemonList } = this.pokeAPIClient;
       let pokemonListData = null;
-      const nextPage = shouldFetchNextPage && this.nextPageURL;
-      const prevPage = shouldFetchPreviousPage && this.previousPageURL;
 
-      if (nextPage) {
-        pokemonListData = await getPokemonDataByURL(this.nextPageURL);
-      } else if (prevPage) {
-        pokemonListData = await getPokemonDataByURL(this.previousPageURL);
+      if (shouldFetchNextPage) {
+        this.startLoadingNext();
+        if (this.nextPageURL) {
+          pokemonListData = await getPokemonDataByURL(this.nextPageURL);
+        }
+      } else if (shouldFetchPreviousPage) {
+        this.startLoadingPrev();
+        if (this.previousPageURL) {
+          pokemonListData = await getPokemonDataByURL(this.previousPageURL);
+        }
       } else {
         pokemonListData = await getPokemonList({
           limit: Pokedex.NUM_OF_PKMNS_PER_PAGE,
@@ -98,7 +141,9 @@ export default class Pokedex {
       }
 
       if (pokemonListData) {
-        this.processPokemonListRawData(pokemonListData);
+        await this.processPokemonListRawData(pokemonListData);
+        this.finishLoadingNext();
+        this.finishLoadingPrev();
         this.successLoading();
       } else {
         this.errorLoading();
@@ -110,45 +155,31 @@ export default class Pokedex {
     this.finishLoading();
   }
 
-  async loadFullPokemonData(pokemon: Pokemon, url: string) {
+  async processPokemonListRawData(pokemonListData: PokemonListRawData) {
+    const { previous, next } = pokemonListData;
+    this.setPreviousPageURL(previous);
+    this.setNextPageURL(next);
+
+    const pokemons = await this.formatPokemonListRawData(pokemonListData);
+    this.setCurrentDisplayedPokemons(pokemons);
+  }
+
+  async formatPokemonListRawData(pokemonListData: PokemonListRawData): Promise<Array<Pokemon>> {
+    const pokemons = await Promise.all(pokemonListData.results.map(this.resolvePokemonData));
+
+    return pokemons;
+  }
+
+  resolvePokemonData = async (pokemonInitialRawData: PokemonInitialRawData): Promise<Pokemon> => {
+    const { name, url } = pokemonInitialRawData;
     try {
       const fullPokemonData = await this.pokeAPIClient.getPokemonDataByURL(url);
       const spriteData = await this.pokeAPIClient.getPokemonDataByURL(fullPokemonData.forms[0]);
       const sprite = spriteData.sprites.front_default;
 
-      pokemon.setPokemonData({ sprite });
+      return new Pokemon({ name, sprite });
     } catch (error) {
-      console.log(`Error loading data for ${pokemon.name}`);
+      return new Pokemon({ name });
     }
-  }
-
-  processPokemonListRawData(pokemonListData: PokemonListRawData) {
-    const pokemons = this.formatPokemonListRawData(pokemonListData);
-    this.setCurrentDisplayedPokemons(pokemons);
-  }
-
-  formatPokemonListRawData(pokemonListData: PokemonListRawData): Array<Pokemon> {
-    return pokemonListData.results.map(this.getPokemonFromRawData);
-  }
-
-  getPokemonFromRawData = (pokemonInitialRawData: PokemonInitialRawData): Pokemon => {
-    const { name, url } = pokemonInitialRawData;
-    const cachedPokemon = this.getCachedPokemon(name);
-    const pokemon = cachedPokemon || new Pokemon(name);
-
-    this.loadFullPokemonData(pokemon, url);
-
-    if (!cachedPokemon) {
-      this.cachePokemon(pokemon);
-    }
-
-    return pokemon;
   };
-
-  getCachedPokemon(name: string): ?Pokemon {
-    const isCached = (cachedPokemon: Pokemon) =>
-      cachedPokemon.name.toLowerCase() === name.toLowerCase();
-
-    return this.pokemonsCache.find(isCached);
-  }
 }

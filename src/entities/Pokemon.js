@@ -3,15 +3,17 @@
 import { action, observable } from 'mobx';
 
 type PokemonData = {
-  sprite?: any,
+  name: string,
+  sprite?: string,
 };
 
 export default class Pokemon {
   @observable name: string = '';
   @observable sprite: string = '';
 
-  constructor(name: string) {
+  constructor({ name, sprite = '' }: PokemonData) {
     this.setName(name);
+    this.setSprite(sprite);
   }
 
   @action
@@ -20,7 +22,7 @@ export default class Pokemon {
   }
 
   @action
-  setPokemonData(pokemonData: PokemonData) {
-    this.sprite = pokemonData.sprite || this.sprite;
+  setSprite(sprite: string) {
+    this.sprite = sprite;
   }
 }
