@@ -23,14 +23,14 @@ export default class PokeAPIClient {
     try {
       const response = await fetch(`${PokeAPIClient.BASE_URL}/pokemon/${name}`);
 
-      if (!response.ok) {
-        return null;
+      const responseJSON = await response.json();
+
+      if (responseJSON && responseJSON.detail && responseJSON.detail === 'Not found.') {
+        return { error: PokeAPIClient.NOT_FOUND_CODE };
       }
 
-      const responseJSON = response.json();
-
-      if (responseJSON.detail === 'Not found') {
-        return { error: PokeAPIClient.NOT_FOUND_CODE };
+      if (!response.ok) {
+        return null;
       }
 
       return responseJSON;

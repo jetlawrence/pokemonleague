@@ -1,5 +1,6 @@
 /* @flow */
 
+import debounce from 'lodash.debounce';
 import React, { Component } from 'react';
 import {
   ActivityIndicator,
@@ -8,6 +9,7 @@ import {
   View,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
 } from 'react-native';
 import { toJS } from 'mobx';
@@ -65,8 +67,17 @@ const styles = StyleSheet.create({
   },
   pokemonSprite: {
     marginHorizontal: 5,
-    width: 20,
-    height: 20,
+    width: 25,
+    height: 25,
+  },
+  searchInputContainer: {
+    padding: 10,
+  },
+  searchInput: {
+    padding: 5,
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
   },
 });
 
@@ -93,22 +104,37 @@ export default class PokemonList extends Component<Props> {
     this.props.pokedex.reloadFetchPokemons();
   };
 
+  onSearchTermChange = (searchTerm: string) => {
+    this.props.pokedex.setSearchTerm(searchTerm);
+    this.onSearch();
+  };
+
+  onSearch = debounce(() => this.props.pokedex.searchPokemon(), 1000);
+
   render() {
+    const { pokedex } = this.props;
     const { isLoading } = this.props.pokedex;
 
     return (
       <View style={styles.pokemonListContainer}>
+        <View style={styles.searchInputContainer}>
+          <TextInput
+            autoCorrect={false}
+            onChangeText={this.onSearchTermChange}
+            style={styles.searchInput}
+          />
+        </View>
         {isLoading ? this.renderLoadingView() : this.renderList()}
         <View style={styles.navigationButtonsContainer}>
           <TouchableOpacity
-            disabled={isLoading || !this.props.pokedex.hasPrev}
+            disabled={isLoading || !pokedex.hasPrev}
             onPress={this.onPrevPress}
             style={styles.navigationButton}
           >
             <Text>{'< Previous'}</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            disabled={isLoading || !this.props.pokedex.hasNext}
+            disabled={isLoading || !pokedex.hasNext}
             onPress={this.onNextPress}
             style={styles.navigationButton}
           >

@@ -4,7 +4,7 @@ import { action, computed, observable, IObservableArray } from 'mobx';
 import Pokemon from '../entities/Pokemon';
 import PokeAPIClient from '../PokeAPIClient';
 
-type PokemonInitialRawData = {
+type PokemonURLRawData = {
   url: string,
   name: string,
 };
@@ -12,14 +12,13 @@ type PokemonInitialRawData = {
 type PokemonListRawData = {
   count: number,
   previous: string | null,
-  results: Array<PokemonInitialRawData>,
+  results: Array<PokemonURLRawData>,
   next: string | null,
 };
 
-type PokemonExtendedData = {
-  sprite: string,
-  type1: string,
-  type2: string,
+type PokemonRawData = {
+  forms: Array<PokemonURLRawData>,
+  types: Array<{ slot: number, type: PokemonURLRawData }>,
 };
 
 export default class Pokedex {
@@ -31,6 +30,7 @@ export default class Pokedex {
   @observable nextPageURL: string | null;
   @observable previousPageURL: string | null;
   @observable isErrorLoading: boolean = false;
+  @observable searchTerm: string = '';
 
   static NUM_OF_PKMNS_PER_PAGE = 20;
 
@@ -100,6 +100,11 @@ export default class Pokedex {
   errorLoading() {
     this.isErrorLoading = true;
     this.finishLoading();
+  }
+
+  @action
+  setSearchTerm(searchTerm: string) {
+    this.searchTerm = searchTerm;
   }
 
   @computed
@@ -172,20 +177,30 @@ export default class Pokedex {
     this.finishLoading();
   }
 
-  async searchPokemon(pokemonName: string) {
+  async searchPokemon() {
     try {
       if (this.isLoading) {
         return;
       }
+
+      if (!this.searchTerm.length) {
+        await this.fetchPokemons();
+        return;
+      }
+
       this.startLoading();
       this.startSearchingPokemon();
+
+      const pokemonName = this.searchTerm.toLowerCase();
       const pokemonRawData = await this.pokeAPIClient.getPokemonByName(pokemonName);
 
       if (pokemonRawData.error && pokemonRawData.error === PokeAPIClient.NOT_FOUND_CODE) {
         this.setCurrentDisplayedPokemons([]);
         this.finishSearchingPokemon();
       } else {
-        const pokemon = await this.resolvePokemonData();
+        const pokemon = new Pokemon(pokemonName);
+        this.setCurrentDisplayedPokemons([pokemon]);
+        this.resolvePokemonData(pokemonName, pokemonRawData);
       }
     } catch (error) {
       this.errorLoading();
@@ -207,16 +222,20 @@ export default class Pokedex {
   }
 
   async resolveCurrentlyDisplayedPokemons(pokemonListRawData: PokemonListRawData) {
-    await Promise.all(pokemonListRawData.results.map(this.resolvePokemonData));
+    await Promise.all(pokemonListRawData.results.map(this.onResolveCurrentlyDisplayedPokemon));
   }
 
-  resolvePokemonData = async (pokemonInitialRawData: PokemonInitialRawData) => {
+  onResolveCurrentlyDisplayedPokemon = async (pokemonInitialRawData: PokemonURLRawData) => {
     const { name, url } = pokemonInitialRawData;
+    const pokemonRawData = await this.pokeAPIClient.getPokemonDataByURL(url);
 
+    await this.resolvePokemonData(name, pokemonRawData);
+  };
+
+  async resolvePokemonData(name: string, pokemonRawData: PokemonRawData) {
     try {
-      const fullPokemonData = await this.pokeAPIClient.getPokemonDataByURL(url);
-      const { types = [] } = fullPokemonData;
-      const spriteData = await this.pokeAPIClient.getPokemonDataByURL(fullPokemonData.forms[0]);
+      const { types = [] } = pokemonRawData;
+      const spriteData = await this.pokeAPIClient.getPokemonDataByURL(pokemonRawData.forms[0].url);
       const sprite = spriteData.sprites.front_default;
 
       const type1Data = types.find(type => type.slot === 1);
@@ -230,5 +249,5 @@ export default class Pokedex {
     } catch (error) {
       console.log('Error resolving pokemon data');
     }
-  };
+  }
 }
