@@ -2,7 +2,7 @@
 
 import React, { Component } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { PokemonList } from './components';
+import { PokemonList, PokemonTeamList } from './components';
 
 const styles = StyleSheet.create({
   container: {
@@ -11,19 +11,19 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     flex: 1,
-    borderWidth: 5,
+    borderWidth: 1,
   },
   pokemonTeamContainer: {
     flex: 1.5,
-    borderWidth: 5,
+    borderWidth: 1,
   },
   pokemonLineUpContainer: {
     flex: 1,
-    borderWidth: 5,
+    borderWidth: 1,
   },
   pokemonDetailsContainer: {
     flex: 1,
-    borderWidth: 5,
+    borderWidth: 1,
   },
 });
 
@@ -32,7 +32,9 @@ export default class PokemonTeamBuilder extends Component<*> {
     return (
       <View style={styles.container}>
         <View style={styles.pokemonTeamContainer}>
-          <View style={styles.pokemonLineUpContainer} />
+          <View style={styles.pokemonLineUpContainer}>
+            <PokemonTeamList />
+          </View>
           <View style={styles.pokemonDetailsContainer} />
         </View>
         <View style={styles.searchContainer}>
