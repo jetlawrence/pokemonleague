@@ -10,6 +10,7 @@ import {
   Text,
   TouchableOpacity,
 } from 'react-native';
+import { toJS } from 'mobx';
 import { inject, observer } from 'mobx-react/native';
 import type Pokedex from '../store/Pokedex';
 import type Pokemon from '../entities/Pokemon';
@@ -147,7 +148,7 @@ export default class PokemonList extends Component<Props> {
     return (
       <FlatList
         ItemSeparatorComponent={() => <View style={styles.separator} />}
-        data={this.props.pokedex.currentDisplayedPokemons}
+        data={toJS(this.props.pokedex.currentDisplayedPokemons)}
         keyExtractor={(pokemon: Pokemon) => pokemon.name}
         renderItem={this.renderPokemonListItem}
       />

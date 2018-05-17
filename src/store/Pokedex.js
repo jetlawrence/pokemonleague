@@ -16,11 +16,18 @@ type PokemonListRawData = {
   next: string | null,
 };
 
+type PokemonExtendedData = {
+  sprite: string,
+  type1: string,
+  type2: string,
+};
+
 export default class Pokedex {
   @observable currentDisplayedPokemons: IObservableArray<Pokemon> = observable([]);
   @observable isLoading: boolean = false;
   @observable isLoadingNext: boolean = false;
   @observable isLoadingPrev: boolean = false;
+  @observable isSearchingPokemon: boolean = false;
   @observable nextPageURL: string | null;
   @observable previousPageURL: string | null;
   @observable isErrorLoading: boolean = false;
@@ -40,6 +47,7 @@ export default class Pokedex {
 
   @action
   startLoading() {
+    this.isErrorLoading = false;
     this.isLoading = true;
   }
 
@@ -59,13 +67,23 @@ export default class Pokedex {
   }
 
   @action
+  startLoadingPrev() {
+    this.isLoadingPrev = true;
+  }
+
+  @action
   finishLoadingPrev() {
     this.isLoadingPrev = false;
   }
 
   @action
-  startLoadingPrev() {
-    this.isLoadingPrev = true;
+  startSearchingPokemon() {
+    this.isSearchingPokemon = true;
+  }
+
+  @action
+  finishSearchingPokemon() {
+    this.isSearchingPokemon = false;
   }
 
   @action
@@ -81,6 +99,7 @@ export default class Pokedex {
   @action
   errorLoading() {
     this.isErrorLoading = true;
+    this.finishLoading();
   }
 
   @computed
@@ -91,11 +110,6 @@ export default class Pokedex {
   @computed
   get hasPrev(): boolean {
     return Boolean(this.previousPageURL);
-  }
-
-  @action
-  successLoading() {
-    this.isErrorLoading = false;
   }
 
   reloadFetchPokemons() {
@@ -144,42 +158,77 @@ export default class Pokedex {
         await this.processPokemonListRawData(pokemonListData);
         this.finishLoadingNext();
         this.finishLoadingPrev();
-        this.successLoading();
       } else {
         this.errorLoading();
+
+        return;
       }
     } catch (error) {
       this.errorLoading();
+
+      return;
     }
 
     this.finishLoading();
   }
 
-  async processPokemonListRawData(pokemonListData: PokemonListRawData) {
-    const { previous, next } = pokemonListData;
+  async searchPokemon(pokemonName: string) {
+    try {
+      if (this.isLoading) {
+        return;
+      }
+      this.startLoading();
+      this.startSearchingPokemon();
+      const pokemonRawData = await this.pokeAPIClient.getPokemonByName(pokemonName);
+
+      if (pokemonRawData.error && pokemonRawData.error === PokeAPIClient.NOT_FOUND_CODE) {
+        this.setCurrentDisplayedPokemons([]);
+        this.finishSearchingPokemon();
+      } else {
+        const pokemon = await this.resolvePokemonData();
+      }
+    } catch (error) {
+      this.errorLoading();
+
+      return;
+    }
+
+    this.finishLoading();
+  }
+
+  processPokemonListRawData(pokemonListRawData: PokemonListRawData) {
+    const { previous, next } = pokemonListRawData;
     this.setPreviousPageURL(previous);
     this.setNextPageURL(next);
 
-    const pokemons = await this.formatPokemonListRawData(pokemonListData);
+    const pokemons = pokemonListRawData.results.map(({ name }) => new Pokemon(name));
     this.setCurrentDisplayedPokemons(pokemons);
+    this.resolveCurrentlyDisplayedPokemons(pokemonListRawData);
   }
 
-  async formatPokemonListRawData(pokemonListData: PokemonListRawData): Promise<Array<Pokemon>> {
-    const pokemons = await Promise.all(pokemonListData.results.map(this.resolvePokemonData));
-
-    return pokemons;
+  async resolveCurrentlyDisplayedPokemons(pokemonListRawData: PokemonListRawData) {
+    await Promise.all(pokemonListRawData.results.map(this.resolvePokemonData));
   }
 
-  resolvePokemonData = async (pokemonInitialRawData: PokemonInitialRawData): Promise<Pokemon> => {
+  resolvePokemonData = async (pokemonInitialRawData: PokemonInitialRawData) => {
     const { name, url } = pokemonInitialRawData;
+
     try {
       const fullPokemonData = await this.pokeAPIClient.getPokemonDataByURL(url);
+      const { types = [] } = fullPokemonData;
       const spriteData = await this.pokeAPIClient.getPokemonDataByURL(fullPokemonData.forms[0]);
       const sprite = spriteData.sprites.front_default;
 
-      return new Pokemon({ name, sprite });
+      const type1Data = types.find(type => type.slot === 1);
+      const type2Data = types.find(type => type.slot === 2);
+      const type1 = type1Data ? type1Data.type.name : '';
+      const type2 = type2Data ? type2Data.type.name : '';
+
+      const pokemonToUpdate = this.currentDisplayedPokemons.find(displayedPokemon => displayedPokemon.name === name);
+
+      pokemonToUpdate.update({ sprite, type1, type2 });
     } catch (error) {
-      return new Pokemon({ name });
+      console.log('Error resolving pokemon data');
     }
   };
 }
