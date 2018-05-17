@@ -4,7 +4,7 @@
 export default class PokeAPIClient {
   static BASE_URL = 'https://pokeapi.co/api/v2';
 
-  async getPokemonList({ limit, offset = 0 }: { limit: number, offset?: number }) {
+  async getPokemonList({ limit, offset = 0 }: { limit: number, offset?: number }): Object {
     try {
       const response = await fetch(`${PokeAPIClient.BASE_URL}/pokemon/?limit=${limit}&offset=${offset}/`);
 
@@ -18,7 +18,7 @@ export default class PokeAPIClient {
     }
   }
 
-  async getPokemonByName(name: string) {
+  async getPokemonByName(name: string): Object {
     try {
       const response = await fetch(`${PokeAPIClient.BASE_URL}/pokemon/${name}`);
 
@@ -32,7 +32,7 @@ export default class PokeAPIClient {
     }
   }
 
-  async getPokemonDataByURL(url: string) {
+  async getPokemonDataByURL(url: string): Object {
     try {
       const response = await fetch(url);
 
