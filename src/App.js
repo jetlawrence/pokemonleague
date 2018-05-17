@@ -9,7 +9,7 @@ import Pokedex from './store/Pokedex';
 const pokeAPIClient = new PokeAPIClient();
 const pokedex = new Pokedex(pokeAPIClient);
 
-export default class App extends Component {
+export default class App extends Component<*> {
   render() {
     return (
       <Provider pokedex={pokedex} pokeAPIClient={pokeAPIClient}>
