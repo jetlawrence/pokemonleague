@@ -22,6 +22,7 @@ type PokemonRawData = {
 };
 
 export default class Pokedex {
+  @observable cachedPokemons: IObservableArray<Pokemon> = observable([]);
   @observable currentDisplayedPokemons: IObservableArray<Pokemon> = observable([]);
   @observable isLoading: boolean = false;
   @observable isLoadingNext: boolean = false;
@@ -43,6 +44,11 @@ export default class Pokedex {
   @action
   setCurrentDisplayedPokemons(currentDisplayedPokemons: Array<Pokemon>) {
     this.currentDisplayedPokemons.replace(currentDisplayedPokemons);
+  }
+
+  @action
+  cachePokemon(pokemon: Pokemon) {
+    this.cachedPokemons.push(pokemon);
   }
 
   @action
@@ -198,7 +204,8 @@ export default class Pokedex {
         this.setCurrentDisplayedPokemons([]);
         this.finishSearchingPokemon();
       } else {
-        const pokemon = new Pokemon(pokemonName);
+        const cachedPokemon = this.getCachedPokemon(pokemonName);
+        const pokemon = cachedPokemon || new Pokemon(pokemonName);
         this.setCurrentDisplayedPokemons([pokemon]);
         this.resolvePokemonData(pokemonName, pokemonRawData);
       }
@@ -216,7 +223,11 @@ export default class Pokedex {
     this.setPreviousPageURL(previous);
     this.setNextPageURL(next);
 
-    const pokemons = pokemonListRawData.results.map(({ name }) => new Pokemon(name));
+    const pokemons = pokemonListRawData.results.map(({ name }) => {
+      const cachedPokemon = this.getCachedPokemon(name);
+      return cachedPokemon || new Pokemon(name);
+    });
+
     this.setCurrentDisplayedPokemons(pokemons);
     this.resolveCurrentlyDisplayedPokemons(pokemonListRawData);
   }
@@ -234,6 +245,8 @@ export default class Pokedex {
 
   async resolvePokemonData(name: string, pokemonRawData: PokemonRawData) {
     try {
+      const pokemonToUpdate = this.currentDisplayedPokemons.find(displayedPokemon => displayedPokemon.name === name);
+
       const { types = [] } = pokemonRawData;
       const spriteData = await this.pokeAPIClient.getPokemonDataByURL(pokemonRawData.forms[0].url);
       const sprite = spriteData.sprites.front_default;
@@ -243,11 +256,14 @@ export default class Pokedex {
       const type1 = type1Data ? type1Data.type.name : '';
       const type2 = type2Data ? type2Data.type.name : '';
 
-      const pokemonToUpdate = this.currentDisplayedPokemons.find(displayedPokemon => displayedPokemon.name === name);
 
       pokemonToUpdate.update({ sprite, type1, type2 });
+      this.cachePokemon(pokemonToUpdate);
     } catch (error) {
       console.log('Error resolving pokemon data');
     }
   }
+
+  getCachedPokemon = (name: string) =>
+    this.cachedPokemons.find(cachedPokemon => cachedPokemon.name === name)
 }
