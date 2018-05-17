@@ -7,35 +7,37 @@ import { PokemonList } from './components';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+    flexDirection: 'row',
   },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
+  searchContainer: {
+    flex: 1,
+    borderWidth: 5,
   },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
+  pokemonTeamContainer: {
+    flex: 1.5,
+    borderWidth: 5,
   },
-});
-
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n Shake or press menu button for dev menu',
+  pokemonLineUpContainer: {
+    flex: 1,
+    borderWidth: 5,
+  },
+  pokemonDetailsContainer: {
+    flex: 1,
+    borderWidth: 5,
+  },
 });
 
 export default class PokemonTeamBuilder extends Component<*> {
   render() {
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>Welcome to React Native!</Text>
-        <Text style={styles.instructions}>To get started, edit App.js</Text>
-        <Text style={styles.instructions}>{instructions}</Text>
-        <PokemonList />
+        <View style={styles.pokemonTeamContainer}>
+          <View style={styles.pokemonLineUpContainer} />
+          <View style={styles.pokemonDetailsContainer} />
+        </View>
+        <View style={styles.searchContainer}>
+          <PokemonList />
+        </View>
       </View>
     );
   }
