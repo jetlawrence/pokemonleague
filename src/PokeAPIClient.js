@@ -3,7 +3,7 @@
 /* eslint-disable class-methods-use-this */
 export default class PokeAPIClient {
   static BASE_URL = 'https://pokeapi.co/api/v2';
-  static NOT_FOUND_CODE = 'NOT_FOUND';
+  static NOT_FOUND_ERROR = 'NOT_FOUND';
 
   async getPokemonList({ limit, offset = 0 }: { limit: number, offset?: number }): Object {
     try {
@@ -26,7 +26,7 @@ export default class PokeAPIClient {
       const responseJSON = await response.json();
 
       if (responseJSON && responseJSON.detail && responseJSON.detail === 'Not found.') {
-        return { error: PokeAPIClient.NOT_FOUND_CODE };
+        return { error: PokeAPIClient.NOT_FOUND_ERROR };
       }
 
       if (!response.ok) {

@@ -106,7 +106,6 @@ export default class PokemonList extends Component<Props> {
 
   onSearchTermChange = (searchTerm: string) => {
     this.props.pokedex.setSearchTerm(searchTerm);
-    this.onSearch();
   };
 
   onSearch = debounce(() => this.props.pokedex.searchPokemon(), 1000);
@@ -121,6 +120,7 @@ export default class PokemonList extends Component<Props> {
           <TextInput
             autoCorrect={false}
             onChangeText={this.onSearchTermChange}
+            onEndEditing={this.onSearch}
             style={styles.searchInput}
           />
         </View>
@@ -181,8 +181,7 @@ export default class PokemonList extends Component<Props> {
     );
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  renderPokemonListItem(listItem: { item: Pokemon }) {
+  renderPokemonListItem = (listItem: { item: Pokemon }) => {
     const { item: pokemon } = listItem;
     const { name, sprite } = pokemon;
 
@@ -195,5 +194,5 @@ export default class PokemonList extends Component<Props> {
         <Text>{capitalizeString(name)}</Text>
       </View>
     );
-  }
+  };
 }

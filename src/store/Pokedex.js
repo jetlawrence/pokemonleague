@@ -197,17 +197,27 @@ export default class Pokedex {
       this.startLoading();
       this.startSearchingPokemon();
 
-      const pokemonName = this.searchTerm.toLowerCase();
-      const pokemonRawData = await this.pokeAPIClient.getPokemonByName(pokemonName);
+      this.setPreviousPageURL(null);
+      this.setNextPageURL(null);
 
-      if (pokemonRawData.error && pokemonRawData.error === PokeAPIClient.NOT_FOUND_CODE) {
-        this.setCurrentDisplayedPokemons([]);
+      const pokemonName = this.searchTerm.trim().toLowerCase();
+      const cachedPokemon = this.getCachedPokemon(pokemonName);
+
+      if (cachedPokemon) {
+        this.setCurrentDisplayedPokemons([cachedPokemon]);
         this.finishSearchingPokemon();
       } else {
-        const cachedPokemon = this.getCachedPokemon(pokemonName);
-        const pokemon = cachedPokemon || new Pokemon(pokemonName);
-        this.setCurrentDisplayedPokemons([pokemon]);
-        this.resolvePokemonData(pokemonName, pokemonRawData);
+        const pokemonRawData = await this.pokeAPIClient.getPokemonByName(pokemonName);
+
+        if (pokemonRawData.error && pokemonRawData.error === PokeAPIClient.NOT_FOUND_ERROR) {
+          this.setCurrentDisplayedPokemons([]);
+          this.finishSearchingPokemon();
+        } else {
+          const pokemon = new Pokemon(pokemonName);
+          this.setCurrentDisplayedPokemons([pokemon]);
+
+          this.resolvePokemonData(pokemonName, pokemonRawData);
+        }
       }
     } catch (error) {
       this.errorLoading();
@@ -239,13 +249,15 @@ export default class Pokedex {
   onResolveCurrentlyDisplayedPokemon = async (pokemonInitialRawData: PokemonURLRawData) => {
     const { name, url } = pokemonInitialRawData;
     const pokemonRawData = await this.pokeAPIClient.getPokemonDataByURL(url);
-
-    await this.resolvePokemonData(name, pokemonRawData);
+    const isCached = Boolean(this.getCachedPokemon(name));
+    if (!isCached) {
+      await this.resolvePokemonData(name, pokemonRawData);
+    }
   };
 
   async resolvePokemonData(name: string, pokemonRawData: PokemonRawData) {
     try {
-      const pokemonToUpdate = this.currentDisplayedPokemons.find(displayedPokemon => displayedPokemon.name === name);
+      const pokemonToUpdate = this.currentDisplayedPokemons.find(pokemon => pokemon.name === name );
 
       const { types = [] } = pokemonRawData;
       const spriteData = await this.pokeAPIClient.getPokemonDataByURL(pokemonRawData.forms[0].url);
