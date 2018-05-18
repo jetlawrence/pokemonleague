@@ -4,7 +4,6 @@ import debounce from 'lodash.debounce';
 import React, { Component } from 'react';
 import {
   ActivityIndicator,
-  Image,
   FlatList,
   View,
   StyleSheet,
@@ -16,8 +15,7 @@ import { toJS } from 'mobx';
 import { inject, observer } from 'mobx-react/native';
 import type { Pokedex, PokemonTeam } from '../store';
 import type Pokemon from '../entities/Pokemon';
-import capitalizeString from '../common/capitalizeString';
-import PokeBallPlaceholderImg from '../resources/pokeball.png';
+import PokemonCell from './PokemonCell';
 
 type Props = {
   pokedex: any | Pokedex,
@@ -32,19 +30,6 @@ const styles = StyleSheet.create({
   pokemonListContainer: {
     flex: 1,
     width: '100%',
-  },
-  pokemonListItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
-    padding: 5,
-  },
-  listItemDetails: {
-    flex: 1,
-    padding: 10,
-    alignItems: 'flex-start',
-    justifyContent: 'center',
   },
   navigationButtonsContainer: {
     flexDirection: 'row',
@@ -73,11 +58,6 @@ const styles = StyleSheet.create({
     margin: 10,
     padding: 10,
   },
-  pokemonSprite: {
-    marginHorizontal: 5,
-    width: 25,
-    height: 25,
-  },
   searchInputContainer: {
     padding: 10,
   },
@@ -86,13 +66,6 @@ const styles = StyleSheet.create({
     height: 40,
     borderColor: 'gray',
     borderWidth: 1,
-  },
-  addButton: {
-    width: '10%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 5,
-    borderWidth: StyleSheet.hairlineWidth,
   },
 });
 
@@ -191,22 +164,8 @@ export default class PokemonList extends Component<Props> {
 
   renderPokemonListItem = (listItem: { item: Pokemon }) => {
     const { item: pokemon } = listItem;
-    const { name, sprite } = pokemon;
 
-    return (
-      <View style={styles.pokemonListItem}>
-        <Image
-          style={styles.pokemonSprite}
-          source={sprite ? { uri: sprite } : PokeBallPlaceholderImg}
-        />
-        <View style={styles.listItemDetails}>
-          <Text>{capitalizeString(name)}</Text>
-        </View>
-        <TouchableOpacity onPress={() => this.onAddPokemonToTeam(pokemon)} style={styles.addButton}>
-          <Text>+</Text>
-        </TouchableOpacity>
-      </View>
-    );
+    return <PokemonCell pokemon={pokemon} onAddPress={() => this.onAddPokemonToTeam(pokemon)} />;
   };
 
   renderNavigationButtons() {

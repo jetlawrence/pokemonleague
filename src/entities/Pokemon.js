@@ -9,10 +9,11 @@ type PokemonExtendedData = {
 };
 
 export default class Pokemon {
-  @observable name: string = '';
-  @observable sprite: string = '';
-  @observable type1: string = '';
-  @observable type2: string = '';
+  @observable name: string = ''
+  @observable sprite: string = ''
+  @observable type1: string = ''
+  @observable type2: string = ''
+  @observable isReady: boolean = false
 
   constructor(name: string) {
     this.setName(name);
@@ -24,10 +25,11 @@ export default class Pokemon {
   }
 
   @action
-  update({ sprite, type1, type2 }: PokemonExtendedData) {
+  updateFullData({ sprite, type1, type2 }: PokemonExtendedData) {
     this.setSprite(sprite);
     this.setType1(type1);
     this.setType2(type2);
+    this.isReadyNow();
   }
 
   @action
@@ -43,5 +45,10 @@ export default class Pokemon {
   @action
   setType2(type2: string = '') {
     this.type2 = type2;
+  }
+
+  @action
+  isReadyNow() {
+    this.isReady = true;
   }
 }

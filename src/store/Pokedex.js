@@ -257,7 +257,7 @@ export default class Pokedex {
 
   async resolvePokemonData(name: string, pokemonRawData: PokemonRawData) {
     try {
-      const pokemonToUpdate = this.currentDisplayedPokemons.find(pokemon => pokemon.name === name );
+      const pokemonToUpdate = this.currentDisplayedPokemons.find(pokemon => pokemon.name === name);
 
       const { types = [] } = pokemonRawData;
       const spriteData = await this.pokeAPIClient.getPokemonDataByURL(pokemonRawData.forms[0].url);
@@ -269,7 +269,7 @@ export default class Pokedex {
       const type2 = type2Data ? type2Data.type.name : '';
 
 
-      pokemonToUpdate.update({ sprite, type1, type2 });
+      pokemonToUpdate.updateFullData({ sprite, type1, type2 });
       this.cachePokemon(pokemonToUpdate);
     } catch (error) {
       console.log('Error resolving pokemon data');
