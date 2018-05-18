@@ -206,6 +206,7 @@ export default class PokemonTeamMemberDetailsView extends Component<Props> {
                 />
                 <View style={styles.nameTextInputContainer}>
                   <TextInput
+                    underlineColorAndroid="rgba(0,0,0,0)"
                     autoCorrect={false}
                     defaultValue={capitalizeFirstLetter(nickname || name)}
                     onChangeText={this.onChangeName}

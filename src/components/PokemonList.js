@@ -131,6 +131,7 @@ export default class PokemonList extends Component<Props> {
     return (
       <View style={styles.searchInputContainer}>
         <TextInput
+          underlineColorAndroid="rgba(0,0,0,0)"
           placeholder="Type full name of pokemon"
           autoCorrect={false}
           onChangeText={this.onSearchTermChange}
