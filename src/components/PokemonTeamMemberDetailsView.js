@@ -49,11 +49,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   button: {
+    backgroundColor: 'rgb(212,201,106)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 10,
+    padding: 5,
     marginLeft: 10,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
+    borderRadius: 10,
+  },
+  buttonLabel: {
+    textAlign: 'center',
+    fontSize: 12,
   },
   nameChangerModal: {
     flex: 1,
@@ -64,6 +70,7 @@ const styles = StyleSheet.create({
     width: '50%',
     backgroundColor: 'rgb(255, 255, 255)',
     padding: 20,
+    borderRadius: 5,
   },
   nameChangerModalScrollView: {
     flex: 1,
@@ -73,12 +80,14 @@ const styles = StyleSheet.create({
   nameInputContainer: {
     flexDirection: 'row',
     padding: 10,
+    borderRadius: 10,
   },
   nameInput: {
     padding: 5,
     height: 40,
     borderColor: 'gray',
     borderWidth: 1,
+    borderRadius: 5,
   },
   nameTextInputContainer: {
     flex: 1,
@@ -86,6 +95,14 @@ const styles = StyleSheet.create({
   },
   description: {
     marginTop: 20,
+  },
+  nameAndTypeTextContainer: {
+    width: '60%',
+  },
+  editButtonContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '40%',
   },
 });
 
@@ -139,20 +156,22 @@ export default class PokemonTeamMemberDetailsView extends Component<Props> {
             contentContainerStyle={styles.fullDetailsContentContainer}
           >
             <View style={styles.nameContainer}>
-              <View>
-                <Text style={styles.name}>
+              <View style={styles.nameAndTypeTextContainer}>
+                <Text numberOfLines={1} style={styles.name}>
                   {displayName}
                 </Text>
                 <Text style={styles.types}>
                   {`${type1Str}${type2Str}`}
                 </Text>
               </View>
-              <TouchableOpacity
-                onPress={this.onEditPress}
-                style={styles.button}
-              >
-                <Text>Edit</Text>
-              </TouchableOpacity>
+              <View style={styles.editButtonContainer}>
+                <TouchableOpacity
+                  onPress={this.onEditPress}
+                  style={styles.button}
+                >
+                  <Text style={styles.buttonLabel}>Change Name</Text>
+                </TouchableOpacity>
+              </View>
             </View>
             <Text style={styles.description}>
               {description}

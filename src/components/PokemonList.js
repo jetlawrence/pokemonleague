@@ -4,6 +4,7 @@ import debounce from 'lodash.debounce';
 import React, { Component } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   View,
   StyleSheet,
@@ -66,6 +67,10 @@ const styles = StyleSheet.create({
     height: 40,
     borderColor: 'gray',
     borderWidth: 1,
+    borderRadius: 4,
+  },
+  disabledText: {
+    color: 'rgb(211,211,211)',
   },
 });
 
@@ -99,7 +104,16 @@ export default class PokemonList extends Component<Props> {
 
   onSearch = debounce(() => this.props.pokedex.searchPokemon(), 1000);
 
-  onAddPokemonToTeam = (pokemon: Pokemon) => this.props.pokemonTeam.addPokemon(pokemon);
+  onAddPokemonToTeam = (pokemon: Pokemon) => {
+    const { pokemonTeam } = this.props;
+
+    if (pokemonTeam.pokemonMembers.length === 6) {
+      Alert.alert('Your team is full!', 'You need to remove a pokemon from your team.');
+      return;
+    }
+
+    this.props.pokemonTeam.addPokemon(pokemon);
+  };
 
   render() {
     const { isLoading } = this.props.pokedex;
@@ -117,6 +131,7 @@ export default class PokemonList extends Component<Props> {
     return (
       <View style={styles.searchInputContainer}>
         <TextInput
+          placeholder="Type full name of pokemon"
           autoCorrect={false}
           onChangeText={this.onSearchTermChange}
           onEndEditing={this.onSearch}
@@ -171,22 +186,24 @@ export default class PokemonList extends Component<Props> {
   renderNavigationButtons() {
     const { pokedex } = this.props;
     const { isLoading } = this.props.pokedex;
+    const isDisabledPrev = isLoading || !pokedex.hasPrev;
+    const isDisabledNext = isLoading || !pokedex.hasNext;
 
     return (
       <View style={styles.navigationButtonsContainer}>
         <TouchableOpacity
-          disabled={isLoading || !pokedex.hasPrev}
+          disabled={isDisabledPrev}
           onPress={this.onPrevPress}
           style={styles.navigationButton}
         >
-          <Text>{'< Previous'}</Text>
+          <Text style={isDisabledPrev ? styles.disabledText : {}}>{'< Previous'}</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          disabled={isLoading || !pokedex.hasNext}
+          disabled={isDisabledNext}
           onPress={this.onNextPress}
           style={styles.navigationButton}
         >
-          <Text>{'Next >'}</Text>
+          <Text style={isDisabledNext ? styles.disabledText : {}}>{'Next >'}</Text>
         </TouchableOpacity>
       </View>
     );

@@ -1,7 +1,7 @@
 /* @flow */
 
 import { action, computed, observable, IObservableArray } from 'mobx';
-import { Pokemon, PokemonTeamMember } from '../entities';
+import { type Pokemon, PokemonTeamMember } from '../entities';
 
 export default class PokemonTeam {
   static MAX_NUM: number = 6;

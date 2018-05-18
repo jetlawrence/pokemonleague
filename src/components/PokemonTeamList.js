@@ -1,7 +1,7 @@
 /* @flow */
 
 import React, { Component } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { action, computed, observable, toJS } from 'mobx';
 import { inject, observer } from 'mobx-react/native';
 import { PokemonTeam } from '../store';
@@ -22,8 +22,8 @@ const styles = StyleSheet.create({
   },
   pokemonCell: {
     flex: 1,
+    margin: 2,
     flexDirection: 'row',
-    borderWidth: 2,
     justifyContent: 'space-between',
   },
   row: {
@@ -40,11 +40,20 @@ const styles = StyleSheet.create({
   },
   pokemonLineUpContainer: {
     flex: 1,
-    borderWidth: 1,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   pokemonDetailsContainer: {
     flex: 1,
-    borderWidth: 1,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 30,
+  },
+  emptyMessage: {
+    textAlign: 'center',
+    color: 'gray',
   },
 });
 
@@ -84,16 +93,35 @@ export default class PokemonTeamList extends Component<Props> {
   }
 
   render() {
+    const { pokemonMembers } = this.props.pokemonTeam;
+
     return (
       <View style={styles.mainContainer}>
         <View style={styles.pokemonLineUpContainer}>
-          {this.renderLineUp()}
+          {pokemonMembers.length > 0 ? this.renderLineUp() : this.renderEmptyLineUp()}
         </View>
         <View style={styles.pokemonDetailsContainer}>
-          {this.isAPokemonSelected && this.selectedPokemon &&
-            <PokemonTeamMemberDetailsView pokemonTeamMember={this.selectedPokemon} />
+          {this.isAPokemonSelected && this.selectedPokemon ?
+            <PokemonTeamMemberDetailsView pokemonTeamMember={this.selectedPokemon} /> :
+            this.renderEmptyDetails()
           }
         </View>
+      </View>
+    );
+  }
+
+  renderEmptyLineUp() {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyMessage}>Your Pokemon Team will be displayed here.</Text>
+      </View>
+    );
+  }
+
+  renderEmptyDetails() {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyMessage}>Your Pokemon Team Member Details will be displayed here.</Text>
       </View>
     );
   }

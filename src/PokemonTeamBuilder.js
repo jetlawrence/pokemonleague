@@ -9,13 +9,14 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
   },
-  searchContainer: {
+  pokemonListContainer: {
     flex: 1,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
   },
   pokemonTeamContainer: {
     flex: 1.5,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
+
   },
 });
 
@@ -26,7 +27,7 @@ export default class PokemonTeamBuilder extends Component<*> {
         <View style={styles.pokemonTeamContainer}>
           <PokemonTeamList />
         </View>
-        <View style={styles.searchContainer}>
+        <View style={styles.pokemonListContainer}>
           <PokemonList />
         </View>
       </View>

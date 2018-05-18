@@ -22,6 +22,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '100%',
     padding: 5,
+    borderWidth: 1,
+    borderRadius: 5,
+    backgroundColor: 'rgb(250,250,210)',
   },
   pokemonCellDetails: {
     flex: 1,
@@ -30,10 +33,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   addOrMinusButton: {
-    width: '10%',
+    width: '15%',
+    backgroundColor: 'rgb(212,201,106)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 5,
+    borderRadius: 10,
     borderWidth: StyleSheet.hairlineWidth,
   },
   pokemonSprite: {
