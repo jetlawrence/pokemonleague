@@ -194,6 +194,7 @@ export default class PokemonTeamMemberDetailsView extends Component<Props> {
         transparent
         visible={this.isNameChangerModalVisible}
         supportedOrientations={['portrait', 'landscape']}
+        onRequestClose={() => null}
       >
         <View style={styles.nameChangerModal}>
           <KeyboardAwareScrollView contentContainerStyle={styles.nameChangerModalScrollView}>
