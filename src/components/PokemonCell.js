@@ -12,6 +12,7 @@ type Props = {
   isOnTeam?: boolean,
   onAddPress?: null | () => void,
   onRemovePress?: null | () => void,
+  onPress?: null | () => void,
 };
 
 const styles = StyleSheet.create({
@@ -54,11 +55,12 @@ export default class PokemonCell extends PureComponent<Props> {
     isOnTeam: false,
     onAddPress: null,
     onRemovePress: null,
+    onPress: null,
   };
 
   render() {
     const {
-      pokemon, customName, isOnTeam, onAddPress, onRemovePress,
+      pokemon, customName, isOnTeam, onAddPress, onRemovePress, onPress,
     } = this.props;
     const {
       sprite, name, type1, type2, isReady,
@@ -67,7 +69,7 @@ export default class PokemonCell extends PureComponent<Props> {
     const type2Str = type2 ? ` / ${capitalizeFirstLetter(type2)}` : '';
 
     return (
-      <View style={styles.pokemonCell}>
+      <TouchableOpacity disabled={!onPress} onPress={onPress} style={styles.pokemonCell}>
         <Image
           style={styles.pokemonSprite}
           source={sprite ? { uri: sprite } : PokeBallPlaceholderImg}
@@ -92,7 +94,7 @@ export default class PokemonCell extends PureComponent<Props> {
             <Text>{isOnTeam ? '-' : '+'}</Text>
           </TouchableOpacity>
         }
-      </View>
+      </TouchableOpacity>
     );
   }
 }
