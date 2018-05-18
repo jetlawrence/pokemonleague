@@ -9,14 +9,21 @@ type PokemonExtendedData = {
 };
 
 export default class Pokemon {
+  @observable id: string = ''
   @observable name: string = ''
   @observable sprite: string = ''
   @observable type1: string = ''
   @observable type2: string = ''
   @observable isReady: boolean = false
 
-  constructor(name: string) {
+  constructor(id: string, name: string) {
+    this.setID(id);
     this.setName(name);
+  }
+
+  @action
+  setID(id: string) {
+    this.id = id;
   }
 
   @action

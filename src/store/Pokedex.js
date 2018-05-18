@@ -17,8 +17,14 @@ type PokemonListRawData = {
 };
 
 type PokemonRawData = {
+  id: number,
   forms: Array<PokemonURLRawData>,
   types: Array<{ slot: number, type: PokemonURLRawData }>,
+};
+
+const getIDFromUrl = (url: string) => {
+  const substrings = url.trim().split('/').filter(substr => substr.length > 0);
+  return substrings[substrings.length - 1];
 };
 
 export default class Pokedex {
@@ -201,7 +207,7 @@ export default class Pokedex {
       this.setNextPageURL(null);
 
       const pokemonName = this.searchTerm.trim().toLowerCase();
-      const cachedPokemon = this.getCachedPokemon(pokemonName);
+      const cachedPokemon = this.getCachedPokemonByName(pokemonName);
 
       if (cachedPokemon) {
         this.setCurrentDisplayedPokemons([cachedPokemon]);
@@ -213,7 +219,7 @@ export default class Pokedex {
           this.setCurrentDisplayedPokemons([]);
           this.finishSearchingPokemon();
         } else {
-          const pokemon = new Pokemon(pokemonName);
+          const pokemon = new Pokemon(`${pokemonRawData.id}`, pokemonName);
           this.setCurrentDisplayedPokemons([pokemon]);
 
           this.resolvePokemonData(pokemonName, pokemonRawData);
@@ -233,9 +239,10 @@ export default class Pokedex {
     this.setPreviousPageURL(previous);
     this.setNextPageURL(next);
 
-    const pokemons = pokemonListRawData.results.map(({ name }) => {
-      const cachedPokemon = this.getCachedPokemon(name);
-      return cachedPokemon || new Pokemon(name);
+    const pokemons = pokemonListRawData.results.map(({ name, url }) => {
+      const id = getIDFromUrl(url);
+      const cachedPokemon = this.getCachedPokemon(id);
+      return cachedPokemon || new Pokemon(id, name);
     });
 
     this.setCurrentDisplayedPokemons(pokemons);
@@ -249,7 +256,8 @@ export default class Pokedex {
   onResolveCurrentlyDisplayedPokemon = async (pokemonInitialRawData: PokemonURLRawData) => {
     const { name, url } = pokemonInitialRawData;
     const pokemonRawData = await this.pokeAPIClient.getPokemonDataByURL(url);
-    const isCached = Boolean(this.getCachedPokemon(name));
+    const id = getIDFromUrl(url);
+    const isCached = Boolean(this.getCachedPokemon(id));
     if (!isCached) {
       await this.resolvePokemonData(name, pokemonRawData);
     }
@@ -276,6 +284,9 @@ export default class Pokedex {
     }
   }
 
-  getCachedPokemon = (name: string) =>
+  getCachedPokemon = (id: string) =>
+    this.cachedPokemons.find(cachedPokemon => cachedPokemon.id === id)
+
+  getCachedPokemonByName = (name: string) =>
     this.cachedPokemons.find(cachedPokemon => cachedPokemon.name === name)
 }
