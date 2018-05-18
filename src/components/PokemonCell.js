@@ -73,7 +73,7 @@ export default class PokemonCell extends PureComponent<Props> {
           source={sprite ? { uri: sprite } : PokeBallPlaceholderImg}
         />
         <View style={styles.pokemonCellDetails}>
-          <Text style={styles.mainDetail}>{customName || capitalizeFirstLetter(name)}</Text>
+          <Text numberOfLines={1} style={styles.mainDetail}>{customName || capitalizeFirstLetter(name)}</Text>
           {
             isReady ? <Text style={styles.subDetail}>{`${type1Str}${type2Str}`}</Text> : <Text style={styles.subDetail}>Loading...</Text>
           }
