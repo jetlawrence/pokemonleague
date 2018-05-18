@@ -1,7 +1,7 @@
 /* @flow */
 
 import { action, computed, observable, IObservableArray } from 'mobx';
-import Pokemon from '../entities/Pokemon';
+import { Pokemon } from '../entities';
 import PokeAPIClient from '../PokeAPIClient';
 
 type PokemonURLRawData = {

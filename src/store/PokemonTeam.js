@@ -1,26 +1,7 @@
 /* @flow */
 
 import { action, computed, observable, IObservableArray } from 'mobx';
-import type Pokemon from '../entities/Pokemon';
-
-export class PokemonTeamMember {
-  @observable pokemon: Pokemon;
-  @observable nickname: string = '';
-
-  constructor(pokemon: Pokemon) {
-    this.setPokemon(pokemon);
-  }
-
-  @action
-  setPokemon(pokemon: Pokemon) {
-    this.pokemon = pokemon;
-  }
-
-  @action
-  setNickname(nickname: string) {
-    this.nickname = nickname;
-  }
-}
+import { type Pokemon, PokemonTeamMember } from '../entities';
 
 export default class PokemonTeam {
   static MAX_NUM: number = 6;

@@ -14,7 +14,7 @@ import {
 import { toJS } from 'mobx';
 import { inject, observer } from 'mobx-react/native';
 import type { Pokedex, PokemonTeam } from '../store';
-import type Pokemon from '../entities/Pokemon';
+import type { Pokemon } from '../entities';
 import PokemonCell from './PokemonCell';
 
 type Props = {
