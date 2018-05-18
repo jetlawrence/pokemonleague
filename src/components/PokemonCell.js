@@ -71,6 +71,7 @@ export default class PokemonCell extends PureComponent<Props> {
     return (
       <TouchableOpacity disabled={!onPress} onPress={onPress} style={styles.pokemonCell}>
         <Image
+          resizeMode="contain"
           style={styles.pokemonSprite}
           source={sprite ? { uri: sprite } : PokeBallPlaceholderImg}
         />

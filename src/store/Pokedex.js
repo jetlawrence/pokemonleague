@@ -268,8 +268,13 @@ export default class Pokedex {
       const pokemonToUpdate = this.currentDisplayedPokemons.find(pokemon => pokemon.name === name);
 
       const { types = [] } = pokemonRawData;
-      const spriteData = await this.pokeAPIClient.getPokemonDataByURL(pokemonRawData.forms[0].url);
+      const [spriteData, descriptionData] = await Promise.all([
+        this.pokeAPIClient.getPokemonDataByURL(pokemonRawData.forms[0].url),
+        this.pokeAPIClient.getPokemonDescription(name),
+      ]);
       const sprite = spriteData.sprites.front_default;
+      const englishDescriptionData = descriptionData.flavor_text_entries.find(entry => entry.language.name === 'en');
+      const description = englishDescriptionData.flavor_text;
 
       const type1Data = types.find(type => type.slot === 1);
       const type2Data = types.find(type => type.slot === 2);
@@ -277,7 +282,9 @@ export default class Pokedex {
       const type2 = type2Data ? type2Data.type.name : '';
 
 
-      pokemonToUpdate.updateFullData({ sprite, type1, type2 });
+      pokemonToUpdate.updateFullData({
+        sprite, type1, type2, description,
+      });
       this.cachePokemon(pokemonToUpdate);
     } catch (error) {
       console.log('Error resolving pokemon data');

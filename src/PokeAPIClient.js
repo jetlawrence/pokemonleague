@@ -52,5 +52,19 @@ export default class PokeAPIClient {
       return null;
     }
   }
+
+  async getPokemonDescription(name: string): Object {
+    try {
+      const response = await fetch(`${PokeAPIClient.BASE_URL}/pokemon-species/${name}`);
+
+      if (!response.ok) {
+        return null;
+      }
+
+      return response.json();
+    } catch (error) {
+      return null;
+    }
+  }
 }
 /* eslint-enable class-methods-use-this */
