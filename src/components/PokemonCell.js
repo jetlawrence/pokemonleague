@@ -1,3 +1,5 @@
+/* @flow */
+
 import React, { PureComponent } from 'react';
 import { Image, View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import type Pokemon from '../entities/Pokemon';
@@ -8,8 +10,8 @@ type Props = {
   pokemon: Pokemon,
   customName?: string,
   isOnTeam?: boolean,
-  onAddPress?: () => void,
-  onRemovePress?: () => void,
+  onAddPress?: null | () => void,
+  onRemovePress?: null | () => void,
 };
 
 const styles = StyleSheet.create({
@@ -78,7 +80,10 @@ export default class PokemonCell extends PureComponent<Props> {
         </View>
         {isReady &&
           <TouchableOpacity
-            onPress={() => (isOnTeam ? onRemovePress() : onAddPress())}
+            onPress={() => (isOnTeam ?
+              onRemovePress && onRemovePress() :
+              onAddPress && onAddPress())
+            }
             style={styles.addOrMinusButton}
           >
             <Text>{isOnTeam ? '-' : '+'}</Text>

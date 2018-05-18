@@ -1,7 +1,7 @@
 /* @flow */
 
 import React, { Component } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { toJS } from 'mobx';
 import { inject, observer } from 'mobx-react/native';
 import { PokemonTeam, PokemonTeamMember } from '../store';
